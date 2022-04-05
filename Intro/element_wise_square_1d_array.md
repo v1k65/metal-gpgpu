@@ -10,14 +10,14 @@ typealias GpuFloatArray1d = GpuArray1d<Float>
 
 class GpuArray1d<T>  {
 
-	let buffer: MTLBuffer
-	let count: Int
+  let buffer: MTLBuffer
+  let count: Int
 
-	private let _content: UnsafeMutablePointer<T>
+  private let _content: UnsafeMutablePointer<T>
 
 	init(count: Int, device: MTLDevice, label: String? = nil) {
-		self.buffer = device.makeBuffer(length: MemoryLayout<T>.stride * count)!
-		self.count = count
+    self.buffer = device.makeBuffer(length: MemoryLayout<T>.stride * count)!
+    self.count = count
 
 		self._content = self.buffer.contents().bindMemory(to: T.self, capacity: count)
 
