@@ -49,3 +49,52 @@ extension GpuFloatArray1d : CustomStringConvertible {
 	}
 }
 ```
+
+kernel is below, each thread will read and square the element.
+```
+#include <metal_stdlib>
+using namespace metal;
+
+kernel void array_square(device float *elments 		[[ buffer(0) ]],
+												 device float *output			[[ buffer(1) ]],
+												 uint thread_idx				  [[ thread_position_in_grid ]]
+												 ) {
+	output[thread_idx] = elments[thread_idx] * elments[thread_idx];
+}
+```
+
+Finally the host code on CUP to run the kernel
+```
+import MetalKit
+import Metal
+
+let device = MTLCreateSystemDefaultDevice()!
+let queue = device.makeCommandQueue()!
+
+let library = device.makeDefaultLibrary()!
+let pipeline = try! device.makeComputePipelineState(function: library.makeFunction(name: "array_square")!)
+
+let inputArray: GpuFloatArray1d = GpuFloatArray1d(count: 100, device: device, label: "input")
+for idx in 0..<inputArray.count {
+	inputArray[idx] = Float(idx)
+}
+
+let outputArray: GpuFloatArray1d = GpuFloatArray1d(count: inputArray.count, device: device, label: "output")
+
+let computBuffer = queue.makeCommandBuffer()!
+
+let commandEncoder = computBuffer.makeComputeCommandEncoder()!
+commandEncoder.setComputePipelineState(pipeline)
+commandEncoder.setBuffer(inputArray.buffer, offset: 0, index: 0)
+commandEncoder.setBuffer(outputArray.buffer, offset: 0, index: 1)
+
+commandEncoder.dispatchThreads(MTLSizeMake(inputArray.count, 1, 1),
+															 threadsPerThreadgroup: MTLSizeMake(pipeline.threadExecutionWidth, 1, 1))
+commandEncoder.endEncoding()
+
+computBuffer.commit()
+computBuffer.waitUntilCompleted()
+
+print(inputArray)
+print(outputArray)
+```
