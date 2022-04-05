@@ -3,7 +3,7 @@ Example: Input -> [1, 5, -3], Output -> [1, 25, 9]
 
 
 First lets add a helper class `GpuFloatArray1d`, similar to Swift `Array` but memory is accessible to both GPU and CPU.
-``` swift
+```swift
 import Metal
 
 typealias GpuFloatArray1d = GpuArray1d<Float>
@@ -42,10 +42,10 @@ extension GpuFloatArray1d : CustomStringConvertible {
 		return str
 	}
 }
-```
+```swift
 
 kernel is below, each thread will read and square the element.
-``` C++
+```C++
 #include <metal_stdlib>
 using namespace metal;
 
@@ -55,10 +55,10 @@ kernel void array_square(device float *elments 		[[ buffer(0) ]],
 												 ) {
 	output[thread_idx] = elments[thread_idx] * elments[thread_idx];
 }
-```
+```C++
 
 Finally the host code on CUP to run the kernel
-``` Swift
+```Swift
 import MetalKit
 import Metal
 
