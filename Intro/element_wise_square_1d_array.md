@@ -2,11 +2,13 @@
 Example: Input -> [1, 5, -3], Output -> [1, 25, 9]
 
 
-First lets add a helper class `GpuArray1d` to easily read and write on both CPU and GPU. Similar to Swift `Array` but memory is accessible to both GPU and CPU.
+First lets add a helper class `GpuFloatArray1d` to easily read and write on both CPU and GPU. Similar to Swift `Array` but memory is accessible to both GPU and CPU.
 ```
 import Metal
 
-class GpuArray1d <T : CustomStringConvertible> {
+typealias GpuFloatArray1d = GpuArray1d<Float>
+
+class GpuArray1d<T>  {
 
 	let buffer: MTLBuffer
 	let count: Int
@@ -34,7 +36,7 @@ class GpuArray1d <T : CustomStringConvertible> {
 	}
 }
 
-extension GpuArray1d : CustomStringConvertible {
+extension GpuFloatArray1d : CustomStringConvertible {
 
 	var description: String {
 		var str =  buffer.label == nil ? "[ " : buffer.label! + " [ "
@@ -46,5 +48,4 @@ extension GpuArray1d : CustomStringConvertible {
 		return str
 	}
 }
-
 ```
