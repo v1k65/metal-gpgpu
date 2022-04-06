@@ -15,47 +15,47 @@ class GpuArray1d<T>  {
 
   private let _content: UnsafeMutablePointer<T>
 
-	init(count: Int, device: MTLDevice, label: String? = nil) {
+  init(count: Int, device: MTLDevice, label: String? = nil) {
     self.buffer = device.makeBuffer(length: MemoryLayout<T>.stride * count)!
     self.count = count
+    self._content = self.buffer.contents().bindMemory(to: T.self, capacity: count)
 
-		self._content = self.buffer.contents().bindMemory(to: T.self, capacity: count)
+    buffer.label = label
+  }
 
-		buffer.label = label
-	}
-
-	subscript(idx: Int) -> T {
-		get { _content[idx] }
-		set { _content[idx] = newValue }
-	}
+  subscript(idx: Int) -> T {
+    get { _content[idx] }
+    set { _content[idx] = newValue }
+  }
 }
 
-extension GpuFloatArray1d : CustomStringConvertible {
+extension GpuArray1d where T == CustomStringConvertible {
 
-	var description: String {
-		var str =  buffer.label == nil ? "[ " : buffer.label! + " [ "
-		for idx in 0..<count {
-			str.append(self[idx].description + ", ")
-		}
-		str.append("]")
+  var description: String {
+    var str =  buffer.label == nil ? "[ " : buffer.label! + " [ "
+    for idx in 0..<count {
+      str.append(self[idx].description + ", ")
+    }
+    str.append("]")
 
-		return str
-	}
+    return str
+  }
 }
-```swift
+```
 
 kernel is below, each thread will read and square the element.
+
 ```C++
 #include <metal_stdlib>
 using namespace metal;
 
-kernel void array_square(device float *elments 		[[ buffer(0) ]],
-												 device float *output			[[ buffer(1) ]],
-												 uint thread_idx				  [[ thread_position_in_grid ]]
-												 ) {
-	output[thread_idx] = elments[thread_idx] * elments[thread_idx];
+kernel void array_square(device float *elments    [[ buffer(0) ]],
+                         device float *output     [[ buffer(1) ]],
+                         uint thread_idx          [[ thread_position_in_grid ]]
+                         ) {
+  output[thread_idx] = elments[thread_idx] * elments[thread_idx];
 }
-```C++
+```
 
 Finally the host code on CUP to run the kernel
 ```Swift
