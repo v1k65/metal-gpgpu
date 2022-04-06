@@ -45,7 +45,7 @@ extension GpuArray1d where T == CustomStringConvertible {
 
 kernel is below, each thread will read and square the element.
 
-```C++
+```c++
 #include <metal_stdlib>
 using namespace metal;
 
@@ -58,7 +58,7 @@ kernel void array_square(device float *elments    [[ buffer(0) ]],
 ```
 
 Finally the host code on CUP to run the kernel
-```Swift
+```swift
 import MetalKit
 import Metal
 
@@ -70,7 +70,7 @@ let pipeline = try! device.makeComputePipelineState(function: library.makeFuncti
 
 let inputArray: GpuFloatArray1d = GpuFloatArray1d(count: 100, device: device, label: "input")
 for idx in 0..<inputArray.count {
-	inputArray[idx] = Float(idx)
+  inputArray[idx] = Float(idx)
 }
 
 let outputArray: GpuFloatArray1d = GpuFloatArray1d(count: inputArray.count, device: device, label: "output")
