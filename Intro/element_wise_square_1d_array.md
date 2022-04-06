@@ -29,7 +29,7 @@ class GpuArray1d<T>  {
   }
 }
 
-extension GpuArray1d where T == CustomStringConvertible {
+extension GpuArray1d where T : CustomStringConvertible {
 
   var description: String {
     var str =  buffer.label == nil ? "[ " : buffer.label! + " [ "
@@ -43,7 +43,7 @@ extension GpuArray1d where T == CustomStringConvertible {
 }
 ```
 
-kernel is below, each thread will read and square the element.
+kernel code, each thread will read and square the element.
 
 ```c++
 #include <metal_stdlib>
@@ -57,7 +57,7 @@ kernel void array_square(device float *elments    [[ buffer(0) ]],
 }
 ```
 
-Finally the host code on CUP to run the kernel
+Finally the host code on CPU to run the kernel code.
 ```swift
 import MetalKit
 import Metal
@@ -89,8 +89,8 @@ commandEncoder.endEncoding()
 computBuffer.commit()
 computBuffer.waitUntilCompleted()
 
-print(inputArray)
-print(outputArray)
+print(inputArray.description)
+print(outputArray.description)
 ```
 
 Output:
